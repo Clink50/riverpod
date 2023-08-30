@@ -27,14 +27,14 @@ The problem is, how do we update the state of a provider from within a consumer?
 Naturally, providers do not expose a way to modify their state.
 This is by design, to ensure that the state is only modified in a controlled way
 and promote separation of concerns.  
-Instead, providers have to explicitly expose a way to modify their state.
+Instead, providers must explicitly expose a way to modify their state.
 
 To do that, we will use a new concept: Notifiers.  
 To showcase this new concept, let's use a more advanced example: A to-do list.
 
 ## Defining a Notifier
 
-Let's start with what we already know by this point: A plain simple _GET_ request.
+Let's start with what we already know by this point: A plain and simple _GET_ request.
 As saw previously in <Link documentID="essentials/first_request" />, we could
 fetch a list of todos by writing:
 
@@ -99,7 +99,7 @@ will follow naturally.
       label: "Modifiers (optional)",
       description: <>
 
-Often, after the type of the provider you may see a "motifier".  
+Often, after the type of the provider you may see a "modifier".  
 Modifiers are optional, and are used to tweak the behavior of the provider
 in a way that is type-safe.
 
@@ -134,12 +134,12 @@ It generally should be a "constructor tear-off".
 If `NotifierProvider` is the "StatefulWidget" class, then this part is
 the `State` class.
 
-This class is responsible for exposing ways to modify the state of the provider.  
+This class handles exposing ways to modify the state of the provider.  
 Public methods on this class are accessible to consumers using `ref.read(yourProvider.notifier).yourMethod()`.
 
 :::note
 Notifiers should not have public properties besides the built-in `state`, as the UI
-would have no mean to know that state has changed.
+would have no way of knowing that state has changed.
 :::
 
 </>
@@ -194,7 +194,7 @@ This method should not be called directly.
 />
 </When>
 
-<!-- Some separation for good mesure -->
+<!-- Some separation for good measure -->
 
 <When codegen={true}>
 <Legend
@@ -232,12 +232,12 @@ When a `@riverpod` annotation is placed on a class, that class is called
 a "Notifier".  
 The class must extend `_$NotifierName`, where `NotifierName` is class name.
 
-Notifiers are responsible for exposing ways to modify the state of the provider.  
+Notifiers handle exposing ways to modify the state of the provider.  
 Public methods on this class are accessible to consumers using `ref.read(yourProvider.notifier).yourMethod()`.
 
 :::note
 Notifiers should not have public properties besides the built-in `state`, as the UI
-would have no mean to know that state has changed.
+would have no way of knowing that the state has changed.
 :::
 
 </>
@@ -300,9 +300,9 @@ when logic is performed in event handlers such as "onPressed".
 
 We now have a button which makes a _POST_ request when pressed.  
 However, at the moment, our UI does not update to reflect the new todo list.
-We will want to our local cache to match the server's state.
+We will want our local cache to match the server's state.
 
-There are a few ways to do so with their pros and cons.
+There are a few ways to do this with their pros and cons.
 
 ### Updating our local cache to match the API response
 
@@ -316,7 +316,7 @@ a new todo. One way of doing this is by writing `state = AsyncData(response)`:
 :::tip pros
 
 - The UI will have the most up-to-date state possible.
-  If another user added a todo, we will see it too.
+  If another user added a todo, we would see it too.
 - The server is the source of truth.
   With this approach, the client doesn't need to know where the new todo
   needs to be inserted in the list of todos.
@@ -335,7 +335,7 @@ a new todo. One way of doing this is by writing `state = AsyncData(response)`:
 
 ### Using `ref.invalidateSelf()` to refresh the provider.
 
-One option is to have our provider re-execute the _GET_ request.  
+Another way is to have our provider re-execute the _GET_ request.  
 This can be done by calling `ref.invalidateSelf()` after the _POST_ request:
 
 <AutoSnippet raw={invalidateSelfAddTodo} />
@@ -343,11 +343,11 @@ This can be done by calling `ref.invalidateSelf()` after the _POST_ request:
 :::tip pros
 
 - The UI will have the most up-to-date state possible.
-  If another user added a todo, we will see it too.
+  If another user added a todo, we would see it too.
 - The server is the source of truth.
   With this approach, the client doesn't need to know where the new todo
   needs to be inserted in the list of todos.
-- This approach should work regarless of the server implementation.
+- This approach should work regardless of the server implementation.
   It can be especially useful if your _GET_ request is more complex,
   such as if it has filters/sorting.
 
@@ -362,15 +362,15 @@ This can be done by calling `ref.invalidateSelf()` after the _POST_ request:
 
 ### Updating the local cache manually
 
-Another option is to update the local cache manually.  
-This would involve trying to mimick the backend's behavior.
+One other way is to update the local cache manually.  
+This would involve trying to mimic the backends’ behavior.
 For instance, we would need to know whether the backend inserts new items
 at the start or at the end.
 
 <AutoSnippet raw={manualAddTodo} />
 
 :::info
-This example uses immutable state. This is not required, but recommended.
+This example uses immutable state. This is not required but it is recommended.
 See <Link documentID="concepts/why_immutability" /> for more details.  
 If you want to use mutable state instead, you can alternatively do:
 
@@ -380,7 +380,7 @@ If you want to use mutable state instead, you can alternatively do:
 
 :::tip pros
 
-- This approach should work regarless of the server implementation.
+- This approach should work regardless of the server implementation.
 - Only a single network-request is needed.
 
 :::
@@ -388,28 +388,28 @@ If you want to use mutable state instead, you can alternatively do:
 :::danger cons
 
 - The local cache may not match the server's state.
-  If another user added a todo, we will not see it.
+  If another user added a todo, we would not see it.
 - This approach may be more complex to implement and effectively
-  duplicate the backend's logic.
+  duplicate the backends’ logic.
 
 :::
 
 ## Going further: Showing a spinner & error handling
 
-We've all we seen do far, we have a button which makes a _POST_ request
-when pressed; and when the request is done, the UI updates to reflect
+Here is what we have seen so far, we have a button which makes a _POST_ request
+when pressed; and when the request is done, the UI updates to reflect the
 changes.  
 But at the moment, there is no indication that the request is being
-performed, nor any information if failed.
+performed, nor any information if it failed.
 
-One way to do so is to store the Future returned by `addTodo`
+One way to do this is to store the Future returned by `addTodo`
 in the local widget state, and then listen to that future to show
-a snipper or error message.  
+a spinner or error message.  
 This is one scenario where [flutter_hooks](https://pub.dev/packages/flutter_hooks)
 comes in handy. But of course, you can also use a `StatefulWidget` instead.
 
 The following snippet shows a progress indicator while
-and operation is pending. And if it failed, renders the button as red:
+an operation is pending. And if it failed, it will render the button as red:
 
 ![A button which turns red when the operation failed](/img/essentials/side_effects/spinner.gif)
 
